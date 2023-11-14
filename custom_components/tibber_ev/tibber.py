@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -60,6 +61,7 @@ class TibberEV:
     def status(self) -> str:
         return self._status
 
+    @Throttle(timedelta(seconds=10))
     async def async_update(self):
         response = await self._session.post(
             url='https://app.tibber.com/v4/gql',
@@ -70,6 +72,9 @@ class TibberEV:
             }
         )
         _LOGGER.debug(f"Response {response}")
+        if response.status == 401:
+            await self.get_token()
+            return
         if response.status != 200:
             _LOGGER.debug("Info API not available")
             return

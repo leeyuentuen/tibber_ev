@@ -158,7 +158,7 @@ TIBBER_SENSOR_TYPES: Final[tuple[TibberSensorDescription, ...]] = (
         path=None,
         subpath=None,
         unit="km",
-        round_digits=None,
+        round_digits=0,
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.DISTANCE,
     ),
@@ -252,6 +252,9 @@ class TibberSensor(TibberEVEntity, SensorEntity):
     @property
     def state(self) -> StateType:
         """Return the state of the sensor."""
+        if self._device.raw_data is None:
+            return None
+
         value = self._device.raw_data.get(self.entity_description.path)
         if value is None:
             if self.entity_description.key == "range":
