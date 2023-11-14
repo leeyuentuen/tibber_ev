@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Tibber EV",
+        "description": "Enter Authentication of Tibber EV",
+        "data": {
+          "name": "Friendly name",
+          "email": "Email",
+          "password": "Password"
+        }
+      }
+    },
+    "abort": {
+      "api_timeout": "Timeout connecting to the api.",
+      "api_failed": "Unexpected error creating api.",
+      "already_configured": "Tibber EV is already configured"
+    }
+  }
+}
