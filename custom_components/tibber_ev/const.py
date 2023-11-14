@@ -1,2 +1,4 @@
 DOMAIN = "tibber_ev"
 TIMEOUT = 90
+
+MAX_CHARGE_RANGE = 375

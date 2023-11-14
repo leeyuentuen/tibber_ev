@@ -2,6 +2,8 @@ import logging
 from typing import Final
 from dataclasses import dataclass
 from datetime import timedelta
+
+from .const import MAX_CHARGE_RANGE
 from .entity import TibberEVEntity
 
 from homeassistant.helpers.typing import StateType
@@ -149,6 +151,17 @@ TIBBER_SENSOR_TYPES: Final[tuple[TibberSensorDescription, ...]] = (
         unit=None,
         round_digits=None,
     ),
+    TibberSensorDescription(
+        key="range",
+        name="Range",
+        icon="mdi:map-marker-distance",
+        path=None,
+        subpath=None,
+        unit="km",
+        round_digits=None,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.DISTANCE,
+    ),
 )
 
 
@@ -239,8 +252,14 @@ class TibberSensor(TibberEVEntity, SensorEntity):
     @property
     def state(self) -> StateType:
         """Return the state of the sensor."""
-        # state of none Api param
         value = self._device.raw_data.get(self.entity_description.path)
+        if value is None:
+            if self.entity_description.key == "range":
+                # get Battery Percentage
+                value = self._device.raw_data.get("battery").get("percent")
+                # calculate range
+                return value / 100 * MAX_CHARGE_RANGE  # todo: make this configurable
+
         if self.entity_description.subpath is not None:
             value = value.get(self.entity_description.subpath)
         return value
