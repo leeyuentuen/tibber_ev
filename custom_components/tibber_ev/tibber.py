@@ -81,4 +81,4 @@ class TibberEV:
         resp = await response.json(content_type=None)
         _LOGGER.debug(f"Response {resp}")
         # get first raw EV data
-        self.raw_data = resp['data']['me']['homes'][0]['electricVehicles'][0]
+        self.raw_data = resp['data']['me']['homes'][0]['electricVehicles']

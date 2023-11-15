@@ -178,12 +178,15 @@ async def async_setup_entry(
         entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback):
     """Set up using config_entry."""
+    # get the device
     device: TibberEV
     device = hass.data[TIBBER_EV_DOMAIN][entry.entry_id]
 
-    sensors = [
-        TibberSensor(device, description) for description in TIBBER_SENSOR_TYPES
-    ]
+    for raw_data in device.raw_data:
+        # get the name of the raw_data
+        sensors = [
+            TibberSensor(device, raw_data, description) for description in TIBBER_SENSOR_TYPES
+        ]
 
     async_add_entities(sensors)
 
@@ -197,12 +200,17 @@ class TibberSensor(TibberEVEntity, SensorEntity):
 
     def __init__(self,
                  device: TibberEV,
+                 raw_data: str,
                  description: TibberSensorDescription) -> None:
         """Initialize the sensor."""
         super().__init__(device)
         self._device = device
-        self._attr_name = f"{device.name} {description.name}"
-        self._attr_unique_id = f"{self._attr_unique_id}-{description.key}"
+        name = raw_data.get("shortName")
+        # get the first 8 character of the id
+        unique_id = raw_data.get("id").replace("-", "")[:8]
+        self._attr_name = f"{name} {description.name}"
+        self._attr_unique_id = f"{unique_id}-{description.key}"
+        self.raw_data = raw_data
         self.entity_description = description
         if description.state_class is not None:
             self._attr_state_class = description.state_class
@@ -212,12 +220,12 @@ class TibberSensor(TibberEVEntity, SensorEntity):
 
     def _get_current_value(self) -> StateType | None:
         """Get the current value."""
-        if self._device.raw_data is None:
+        if self.raw_data is None:
             return None
         elif self.entity_description.path == "":
-            return self._device.raw_data
+            return self.raw_data
         else:
-            return self._device.raw_data.get(self.entity_description.path)
+            return self.raw_data.get(self.entity_description.path)
 
     @callback
     def _async_update_attrs(self) -> None:
@@ -252,14 +260,14 @@ class TibberSensor(TibberEVEntity, SensorEntity):
     @property
     def state(self) -> StateType:
         """Return the state of the sensor."""
-        if self._device.raw_data is None:
+        if self.raw_data is None:
             return None
 
-        value = self._device.raw_data.get(self.entity_description.path)
+        value = self.raw_data.get(self.entity_description.path)
         if value is None:
             if self.entity_description.key == "range":
                 # get Battery Percentage
-                value = self._device.raw_data.get("battery").get("percent")
+                value = self.raw_data.get("battery").get("percent")
                 # calculate range
                 return value / 100 * MAX_CHARGE_RANGE  # todo: make this configurable
 
