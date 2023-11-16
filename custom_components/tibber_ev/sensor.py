@@ -27,7 +27,7 @@ from homeassistant.helpers import entity_platform
 from . import DOMAIN as TIBBER_EV_DOMAIN
 
 
-from .tibber import TibberEV
+from .tibber import Tibber, TibberApi
 
 from homeassistant.const import (
     PERCENTAGE,
@@ -179,17 +179,17 @@ async def async_setup_entry(
         async_add_entities: AddEntitiesCallback):
     """Set up using config_entry."""
     # get the device
-    device: TibberEV
-    device = hass.data[TIBBER_EV_DOMAIN][entry.entry_id]
-
-    for raw_data in device.raw_data:
+    tibberApi: TibberApi
+    tibberApi = hass.data[TIBBER_EV_DOMAIN][entry.entry_id]
+    ev_data = await tibberApi.get_ev_data()
+    for ev in ev_data:
+        device = Tibber(hass, ev, tibberApi)
+        device.raw_data = ev
         # get the name of the raw_data
         sensors = [
-            TibberSensor(device, raw_data, description) for description in TIBBER_SENSOR_TYPES
+            TibberSensor(device, description) for description in TIBBER_SENSOR_TYPES
         ]
-
-    async_add_entities(sensors)
-
+        async_add_entities(sensors)
     platform = entity_platform.current_platform.get()
 
 
@@ -199,18 +199,17 @@ class TibberSensor(TibberEVEntity, SensorEntity):
     entity_description: TibberSensorDescription
 
     def __init__(self,
-                 device: TibberEV,
-                 raw_data: str,
+                 device: Tibber,
                  description: TibberSensorDescription) -> None:
         """Initialize the sensor."""
         super().__init__(device)
         self._device = device
-        name = raw_data.get("shortName")
+        name = device.raw_data.get("shortName")
         # get the first 8 character of the id
-        unique_id = raw_data.get("id").replace("-", "")[:8]
+        unique_id = device.raw_data.get("id").replace("-", "")[:8]
         self._attr_name = f"{name} {description.name}"
         self._attr_unique_id = f"{unique_id}-{description.key}"
-        self.raw_data = raw_data
+        self.raw_data = device.raw_data
         self.entity_description = description
         if description.state_class is not None:
             self._attr_state_class = description.state_class

@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME, CONF_EMAIL, CONF_PASSWORD
 
-from .tibber import TibberEV
+from .tibber import TibberApi
 
 from .const import DOMAIN, TIMEOUT
 
@@ -23,16 +23,16 @@ class FlowHandler(config_entries.ConfigFlow):
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
 
-    async def _create_entry(self, name, email, password) -> None:
+    async def _create_entry(self, email, password) -> None:
         """Register new entry."""
-        return self.async_create_entry(title='Tibber EV', data={CONF_NAME: name, CONF_EMAIL: email, CONF_PASSWORD: password})
+        return self.async_create_entry(title='Tibber EV', data={CONF_EMAIL: email, CONF_PASSWORD: password})
 
-    async def _create_device(self, name, email, password):
+    async def _create_device(self, email, password):
         """Create device."""
 
         try:
-            device = TibberEV(
-                self.hass, name, email, password
+            device = TibberApi(
+                self.hass, email, password
             )
             with timeout(TIMEOUT):
                 await device.init()
@@ -45,7 +45,7 @@ class FlowHandler(config_entries.ConfigFlow):
             _LOGGER.exception("Unexpected error creating device")
             return self.async_abort(reason="api_failed")
 
-        return await self._create_entry(name, email, password)
+        return await self._create_entry(email, password)
 
     async def async_step_user(self, user_input=None):
         """User initiated config flow."""
@@ -54,11 +54,10 @@ class FlowHandler(config_entries.ConfigFlow):
                 step_id="user", data_schema=vol.Schema({
                     vol.Required(CONF_EMAIL): str,
                     vol.Required(CONF_PASSWORD): str,
-                    vol.Optional(CONF_NAME): str
                 })
             )
-        return await self._create_device(user_input[CONF_NAME], user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
+        return await self._create_device(user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
 
     async def async_step_import(self, user_input):
         """Import a config entry."""
-        return await self._create_device(user_input[CONF_NAME], user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
+        return await self._create_device(user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
