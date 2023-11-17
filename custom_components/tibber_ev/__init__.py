@@ -6,7 +6,8 @@ import logging
 
 from aiohttp import ClientConnectionError
 from async_timeout import timeout
-from .tibber import TibberEV
+from .tibber_api import TibberApi
+from .tibber import Tibber
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -39,16 +40,13 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     conf = config_entry.data
-    device = await tibber_setup(
-        hass, conf[CONF_NAME], conf[CONF_EMAIL], conf[CONF_PASSWORD]
-    )
-    if not device:
-        return False
 
-    await device.async_update()
+    _LOGGER.debug("async_setup_entry: %s", config_entry)
+    tibberApi = TibberApi(hass, conf[CONF_EMAIL], conf[CONF_PASSWORD])
+    await tibberApi.init()
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][config_entry.entry_id] = device
+    hass.data[DOMAIN][config_entry.entry_id] = tibberApi
 
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 
@@ -69,12 +67,12 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-async def tibber_setup(hass: HomeAssistant, name: str, email: str, password: str) -> TibberEV | None:
+async def tibber_setup(hass: HomeAssistant, name: str, email: str, password: str) -> TibberApi | None:
     """Create a Tibber instance only once."""
 
     try:
         with timeout(TIMEOUT):
-            device = TibberEV(hass, name, email, password)
+            device = TibberApi(hass, name, email, password)
             await device.init()
     except asyncio.TimeoutError:
         _LOGGER.debug("Connection to %s timed out", name)
