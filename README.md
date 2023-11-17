@@ -25,9 +25,10 @@ Search for integration 'tibber_ev'
 
 ![image](https://github.com/leeyuentuen/tibber_ev/assets/1487966/5a0846ac-df3f-40a0-b59b-e5f6fbf157b3)
 
-Just fill your email, password and give them a friendly name
+Just fill your email, password
 
-![image](https://github.com/leeyuentuen/tibber_ev/assets/1487966/b0271121-691b-46f5-9326-0e98a9f42177)
+![image](https://github.com/leeyuentuen/tibber_ev/assets/1487966/76d8cc3c-3ee6-45ea-9f88-3e009a205040)
+
 
 ![Screenshot 2023-11-14 at 20 38 26](https://github.com/leeyuentuen/tibber_ev/assets/1487966/24b5adfd-b290-477b-84c8-3029d6e5f5b0)
 
