@@ -5,6 +5,6 @@
   "config_flow": true,
   "documentation": "https://github.com/leeyuentuen/tibber_ev",
   "dependencies": [],
-  "codeowners": ["leeyuentuen"]
+  "codeowners": ["leeyuentuen"],
   "iot_class": "cloud_polling",
 }
