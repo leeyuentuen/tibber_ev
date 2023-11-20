@@ -285,6 +285,8 @@ class TibberSensor(TibberEVEntity, SensorEntity):
         await self._device.async_update()
         if isinstance(self._device.raw_data, list):
             for device in self._device.raw_data:
+                if device is None:
+                    return
                 if device.get("id") == self.raw_data.get("id"):
                     self.raw_data = device
                     break
