@@ -287,6 +287,8 @@ class TibberSensor(TibberEVEntity, SensorEntity):
             for device in self._device.raw_data:
                 if device is None:
                     return
+                if self.raw_data is None:
+                    return
                 if device.get("id") == self.raw_data.get("id"):
                     self.raw_data = device
                     break
