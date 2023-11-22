@@ -283,6 +283,8 @@ class TibberSensor(TibberEVEntity, SensorEntity):
     async def async_update(self):
         """Get the latest data and updates the states."""
         await self._device.async_update()
+        if (self._device.raw_data is None):
+            return
         if isinstance(self._device.raw_data, list):
             for device in self._device.raw_data:
                 if device is None:
