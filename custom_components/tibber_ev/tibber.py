@@ -45,3 +45,4 @@ class Tibber:
     @Throttle(timedelta(seconds=10))
     async def async_update(self):
         self.raw_data = await self.tibber_api.get_ev_data()
+        return self.raw_data

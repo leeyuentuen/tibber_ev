@@ -60,7 +60,6 @@ TIBBER_SENSOR_TYPES: Final[tuple[TibberSensorDescription, ...]] = (
     TibberSensorDescription(
         key="battery_soc",
         name="battery soc",
-        icon="mdi:car-electric",
         path="battery",
         subpath="percent",
         unit=PERCENTAGE,
@@ -87,6 +86,8 @@ TIBBER_SENSOR_TYPES: Final[tuple[TibberSensorDescription, ...]] = (
         subpath=None,
         unit=None,
         round_digits=None,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.TIMESTAMP,
     ),
     TibberSensorDescription(
         key="last_seen_text",
@@ -282,4 +283,17 @@ class TibberSensor(TibberEVEntity, SensorEntity):
     async def async_update(self):
         """Get the latest data and updates the states."""
         await self._device.async_update()
+        if (self._device.raw_data is None):
+            return
+        if isinstance(self._device.raw_data, list):
+            for device in self._device.raw_data:
+                if device is None:
+                    return
+                if self.raw_data is None:
+                    return
+                if device.get("id") == self.raw_data.get("id"):
+                    self.raw_data = device
+                    break
+        else:
+            self.raw_data = self._device.raw_data
         self._async_update_attrs()
