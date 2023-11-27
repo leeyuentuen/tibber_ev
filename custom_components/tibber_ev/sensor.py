@@ -268,6 +268,8 @@ class TibberSensor(TibberEVEntity, SensorEntity):
             if self.entity_description.key == "range":
                 # get Battery Percentage
                 value = self.raw_data.get("battery").get("percent")
+                if value is None:
+                    return None
                 # calculate range
                 return value / 100 * MAX_CHARGE_RANGE  # todo: make this configurable
 
