@@ -5,7 +5,9 @@ This application is not an official app affiliated with Tibber.
 
 ## Create Tibber Account
 To set up a Tibber account, download their app from the Play Store (Android) or the App Store (iPhone).
+
 Play Store: https://tibber.onelink.me/3IQr?badge=android&pid=web
+
 App Store: https://tibber.onelink.me/3IQr?badge=ios&pid=web
 
 For individuals situated in countries not listed for registration, please select a country like France and complete the information.
